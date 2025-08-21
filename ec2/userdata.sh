@@ -1,0 +1,82 @@
+#!/bin/bash
+
+# Update system and install AWS CLI v2
+yum update -y || apt-get update -y
+if ! command -v aws >/dev/null 2>&1; then
+  if command -v yum >/dev/null 2>&1; then
+    yum install -y unzip curl wget git bash-completion || true
+  else
+    apt-get install -y unzip curl wget git bash-completion || true
+  fi
+  TMPDIR=/tmp/awscli
+  mkdir -p $TMPDIR
+  curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o /tmp/awscliv2.zip
+  unzip -o /tmp/awscliv2.zip -d /tmp
+  /tmp/aws/install -i /usr/local/aws-cli -b /usr/local/bin || true
+fi
+
+# IAM user creation
+USER_NAME="demo-admin-user"
+PASSWORD="StrongPassword123!"   # Change this to a strong password
+
+echo "=== Creating IAM user: $USER_NAME ==="
+aws iam create-user --user-name "$USER_NAME" || true
+
+echo "=== Attaching AdministratorAccess policy ==="
+aws iam attach-user-policy \
+  --user-name "$USER_NAME" \
+  --policy-arn arn:aws:iam::aws:policy/AdministratorAccess || true
+
+echo "=== Enabling console access ==="
+aws iam create-login-profile \
+  --user-name "$USER_NAME" \
+  --password "$PASSWORD" \
+  --password-reset-required || true
+
+echo "=== Done! ==="
+echo "Login URL: https://<your-account-id>.signin.aws.amazon.com/console"
+echo "Username: $USER_NAME"
+echo "Password: $PASSWORD"
+
+# Install Docker
+if command -v yum >/dev/null 2>&1; then
+  yum install -y docker
+elif command -v apt-get >/dev/null 2>&1; then
+  apt-get install -y docker.io
+fi
+systemctl enable docker
+systemctl start docker
+usermod -aG docker ec2-user || true
+
+# Install Jenkins + Java
+if command -v yum >/dev/null 2>&1; then
+  wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
+  rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
+  yum install -y java-17-amazon-corretto-devel
+  yum install -y jenkins
+elif command -v apt-get >/dev/null 2>&1; then
+  apt-get install -y openjdk-17-jdk jenkins
+fi
+systemctl enable jenkins
+systemctl start jenkins || true
+
+# Update Git
+yum update -y git || apt-get install -y git
+
+# Install kubectl (latest)
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+echo 'source <(kubectl completion bash)' >> /etc/bashrc
+
+# Install Terraform (latest)
+if command -v yum >/dev/null 2>&1; then
+  yum install -y yum-utils
+  yum-config-manager --add-repo https://rpm.releases.hashicorp.com/AmazonLinux/hashicorp.repo
+  yum -y install terraform
+elif command -v apt-get >/dev/null 2>&1; then
+  apt-get update && apt-get install -y gnupg software-properties-common
+  wget -O- https://apt.releases.hashicorp.com/gpg | gpg --dearmor > /usr/share/keyrings/hashicorp.gpg
+  echo "deb [signed-by=/usr/share/keyrings/hashicorp.gpg] https://apt.releases.hashicorp.com $(lsb_release -cs) main" \
+    | tee /etc/apt/sources.list.d/hashicorp.list
+  apt-get update && apt-get install -y terraform
+fi
