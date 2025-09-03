@@ -1,4 +1,4 @@
-  data "aws_iam_policy_document" "ec2_assume_role_policy" {
+data "aws_iam_policy_document" "ec2_assume_role_policy" {
     statement {
       effect = "Allow"
       principals {
@@ -20,6 +20,8 @@
     role       = aws_iam_role.this.name
     policy_arn = "arn:aws:iam::aws:policy/AdministratorAccess"
   }
+
+  
 
   resource "aws_iam_instance_profile" "this" {
     name = "${var.name}-instance-profile"
@@ -97,3 +99,4 @@
     allocation_id = aws_eip.this[0].allocation_id
     instance_id   = aws_instance.this.id
   }
+
