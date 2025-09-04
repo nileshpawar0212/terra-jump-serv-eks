@@ -25,3 +25,29 @@ module "ec2" {
   }
   associate_public_ip = true
 }
+
+module "eks" {
+  source = "./eks"
+
+  cluster_name         = "demo-eks"
+  cluster_iam_role_arn = module.iam.eks_cluster_role_arn
+  vpc_id               = module.vpc.vpc_id
+  subnet_ids           = module.vpc.private_subnets
+  cluster_version      = "1.30" # Specify your desired version here
+
+  tags = {
+    Environment = "demo"
+  }
+}
+
+module "launch_template" {
+  source = "./launch_template"
+
+  vpc_id                    = module.vpc.vpc_id
+  cluster_security_group_id = module.eks.cluster_primary_security_group_id
+  key_name                  = "demo-eks" # Make sure a key pair named 'demo-eks' exists in your AWS account
+
+  tags = {
+    Environment = "demo"
+  }
+}
