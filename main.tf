@@ -51,3 +51,19 @@ module "launch_template" {
     Environment = "demo"
   }
 }
+
+module "eks_node_group" {
+  source = "./eks_node_group"
+
+  cluster_name            = module.eks.cluster_name
+  node_role_arn           = module.iam.eks_node_role_arn
+  subnet_ids              = module.vpc.private_subnets
+  launch_template_id      = module.launch_template.id
+  launch_template_version = module.launch_template.latest_version
+
+  tags = {
+    Environment = "demo"
+  }
+
+  depends_on = [module.eks, module.launch_template]
+}
