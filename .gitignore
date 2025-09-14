@@ -1,4 +1,3 @@
 .terraform
 .terraform.*
 .git
-demo-eks.*
