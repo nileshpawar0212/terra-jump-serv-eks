@@ -23,7 +23,7 @@ module "ec2" {
   tags = {
     Environment = "demo"
   }
-  associate_public_ip = true
+  associate_public_ip = false
 }
 
 module "eks" {
@@ -33,7 +33,7 @@ module "eks" {
   cluster_iam_role_arn = module.iam.eks_cluster_role_arn
   vpc_id               = module.vpc.vpc_id
   subnet_ids           = module.vpc.private_subnets
-  cluster_version      = "1.30" # Specify your desired version here
+  cluster_version      = "1.33" # Specify your desired version here
 
   tags = {
     Environment = "demo"
