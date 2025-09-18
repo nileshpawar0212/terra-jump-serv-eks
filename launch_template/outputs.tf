@@ -14,6 +14,6 @@ output "latest_version" {
 }
 
 output "node_security_group_id" {
-  description = "The ID of the security group created for the nodes."
+  description = "The ID of the security group for the EKS nodes"
   value       = aws_security_group.node_sg.id
 }

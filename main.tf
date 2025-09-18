@@ -1,6 +1,9 @@
 module "vpc" {
-  source = "./vpc"
+  source       = "./vpc"
+  project_name = "jump-jenkins"
+  environment  = "demo"
 }
+
 
 module "iam" {
   source                = "./iam"
@@ -16,7 +19,7 @@ module "ec2" {
   name              = "eks-jump-server"
   iam_role_name     = "demo-eks-jump-role"
   vpc_id            = module.vpc.vpc_id
-  subnet_id         = module.vpc.public_subnets[0]
+  subnet_id         = module.vpc.private_subnets[0]
   instance_type     = "t3.medium"
   ssh_cidr_blocks   = ["106.215.180.79/32"]
   public_key_path   = "./demo-eks.pub"
@@ -66,4 +69,24 @@ module "eks_node_group" {
   }
 
   depends_on = [module.eks, module.launch_template]
+}
+
+resource "aws_security_group_rule" "jump_to_cluster" {
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  source_security_group_id = module.ec2.security_group_id
+  security_group_id        = module.eks.cluster_primary_security_group_id
+  description              = "Allow all traffic from the jump server"
+}
+
+resource "aws_security_group_rule" "nodes_to_cluster" {
+  type                     = "ingress"
+  from_port                = 0
+  to_port                  = 0
+  protocol                 = "-1"
+  source_security_group_id = module.launch_template.node_security_group_id
+  security_group_id        = module.eks.cluster_primary_security_group_id
+  description              = "Allow all traffic from the EKS nodes"
 }
