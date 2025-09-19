@@ -7,7 +7,7 @@ variable "cluster_name" {
 variable "cluster_version" {
   description = "The Kubernetes version for the EKS cluster."
   type        = string
-  default     = "1.30" # Note: 1.33 is not a supported version as of now.
+  default     = "1.33"
 }
 
 variable "cluster_iam_role_arn" {
@@ -29,4 +29,19 @@ variable "tags" {
   description = "A map of tags to add to all resources."
   type        = map(string)
   default     = {}
+}
+
+variable "node_role_arn" {
+  description = "The ARN of the IAM role for the EKS node group."
+  type        = string
+}
+
+variable "launch_template_id" {
+  description = "The ID of the launch template for the node group."
+  type        = string
+}
+
+variable "launch_template_version" {
+  description = "The version of the launch template."
+  type        = string
 }

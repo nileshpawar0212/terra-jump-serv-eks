@@ -1,9 +1,9 @@
 output "eks_cluster_role_arn" {
-  description = "The ARN of the EKS cluster IAM role."
-  value       = aws_iam_role.eks_cluster.arn
+  description = "The ARN of the IAM role for the EKS cluster"
+  value       = aws_iam_role.eks_cluster_role.arn
 }
 
 output "eks_node_role_arn" {
-  description = "The ARN of the EKS node group IAM role."
-  value       = aws_iam_role.eks_node.arn
+  description = "The ARN of the IAM role for the EKS nodes"
+  value       = aws_iam_role.eks_node_role.arn
 }

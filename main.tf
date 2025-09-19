@@ -32,11 +32,14 @@ module "ec2" {
 module "eks" {
   source = "./eks"
 
-  cluster_name         = "demo-eks"
-  cluster_iam_role_arn = module.iam.eks_cluster_role_arn
-  vpc_id               = module.vpc.vpc_id
-  subnet_ids           = module.vpc.private_subnets
-  cluster_version      = "1.33" # Specify your desired version here
+  cluster_name            = "demo-eks"
+  cluster_iam_role_arn    = module.iam.eks_cluster_role_arn
+  vpc_id                  = module.vpc.vpc_id
+  subnet_ids              = module.vpc.private_subnets
+  cluster_version         = "1.33"
+  node_role_arn           = module.iam.eks_node_role_arn
+  launch_template_id      = module.launch_template.id
+  launch_template_version = module.launch_template.latest_version
 
   tags = {
     Environment = "demo"
@@ -55,20 +58,50 @@ module "launch_template" {
   }
 }
 
-module "eks_node_group" {
-  source = "./eks_node_group"
 
-  cluster_name            = module.eks.cluster_name
-  node_role_arn           = module.iam.eks_node_role_arn
-  subnet_ids              = module.vpc.private_subnets
-  launch_template_id      = module.launch_template.id
-  launch_template_version = module.launch_template.latest_version
 
-  tags = {
-    Environment = "demo"
-  }
+/*
+resource "aws_eks_addon" "coredns" {
+  cluster_name = module.eks.cluster_name
+  addon_name   = "coredns"
+  depends_on = [
+    module.eks_node_group
+  ]
+}
 
-  depends_on = [module.eks, module.launch_template]
+resource "aws_eks_addon" "kube_proxy" {
+  cluster_name = module.eks.cluster_name
+  addon_name   = "kube-proxy"
+  depends_on = [
+    module.eks_node_group
+  ]
+}
+
+resource "aws_eks_addon" "vpc_cni" {
+  cluster_name = module.eks.cluster_name
+  addon_name   = "vpc-cni"
+  depends_on = [
+    module.eks_node_group
+  ]
+}
+
+resource "aws_eks_addon" "metrics_server" {
+  cluster_name = module.eks.cluster_name
+  addon_name   = "metrics-server"
+  depends_on = [
+    module.eks_node_group
+  ]
+}
+*/
+
+resource "aws_security_group_rule" "node_to_cluster_443" {
+  type                     = "ingress"
+  from_port                = 443
+  to_port                  = 443
+  protocol                 = "tcp"
+  source_security_group_id = module.launch_template.node_security_group_id
+  security_group_id        = module.eks.cluster_primary_security_group_id
+  description              = "Allow worker nodes to connect to the EKS cluster API"
 }
 
 resource "aws_security_group_rule" "jump_to_cluster" {
