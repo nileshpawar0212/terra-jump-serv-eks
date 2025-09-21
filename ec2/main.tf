@@ -43,11 +43,13 @@ data "aws_iam_policy_document" "ec2_assume_role_policy" {
 
     description = "Security group for ${var.name}"
 
+ 
     ingress {
-      from_port   = 22
-      to_port     = 22
-      protocol    = "tcp"
+      from_port   = 0
+      to_port     = 0
+      protocol    = "-1"
       cidr_blocks = var.ssh_cidr_blocks
+      description = "Allow all traffic from local IP"
     }
 
     egress {

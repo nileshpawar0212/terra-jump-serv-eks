@@ -39,8 +39,8 @@ echo "Username: $USER_NAME"
 echo "Password: $PASSWORD"
 
 # Install Docker
-if command -v yum >/dev/null 2>&1; then
-  yum install -y docker
+if command -v dnf >/dev/null 2>&1; then
+ dnf -y install docker
 elif command -v apt-get >/dev/null 2>&1; then
   apt-get install -y docker.io
 fi
@@ -49,14 +49,14 @@ systemctl start docker
 usermod -aG docker ec2-user || true
 
 # Install Jenkins + Java
-if command -v yum >/dev/null 2>&1; then
-  wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo
-  rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key
-  yum install -y java-17-amazon-corretto-devel
-  yum install -y jenkins
-elif command -v apt-get >/dev/null 2>&1; then
-  apt-get install -y openjdk-17-jdk jenkins
-fi
+sudo wget -O /etc/yum.repos.d/jenkins.repo \
+    https://pkg.jenkins.io/redhat-stable/jenkins.repo
+sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io-2023.key
+sudo dnf upgrade
+# Add required dependencies for the jenkins package
+sudo dnf install fontconfig java-17-amazon-corretto-devel
+sudo dnf install jenkins
+sudo systemctl daemon-reload
 systemctl enable jenkins
 systemctl start jenkins || true
 
