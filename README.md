@@ -1,4 +1,4 @@
-# terraform-jump-server
+# terraform-eks-jump-server
 
 Create S3 bucket 1st
 
