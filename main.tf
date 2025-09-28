@@ -21,7 +21,7 @@ module "ec2" {
   vpc_id            = module.vpc.vpc_id
   subnet_id         = module.vpc.public_subnets[0]
   instance_type     = "t3.small"
-  ssh_cidr_blocks   = ["106.215.180.79/32"]
+  ssh_cidr_blocks   = ["0.1.2.3/32"]
   public_key_path   = "./demo-eks.pub"
   tags = {
     Environment = "demo"
@@ -57,42 +57,6 @@ module "launch_template" {
     Environment = "demo"
   }
 }
-
-
-
-/*
-resource "aws_eks_addon" "coredns" {
-  cluster_name = module.eks.cluster_name
-  addon_name   = "coredns"
-  depends_on = [
-    module.eks_node_group
-  ]
-}
-
-resource "aws_eks_addon" "kube_proxy" {
-  cluster_name = module.eks.cluster_name
-  addon_name   = "kube-proxy"
-  depends_on = [
-    module.eks_node_group
-  ]
-}
-
-resource "aws_eks_addon" "vpc_cni" {
-  cluster_name = module.eks.cluster_name
-  addon_name   = "vpc-cni"
-  depends_on = [
-    module.eks_node_group
-  ]
-}
-
-resource "aws_eks_addon" "metrics_server" {
-  cluster_name = module.eks.cluster_name
-  addon_name   = "metrics-server"
-  depends_on = [
-    module.eks_node_group
-  ]
-}
-*/
 
 resource "aws_security_group_rule" "node_to_cluster_443" {
   type                     = "ingress"

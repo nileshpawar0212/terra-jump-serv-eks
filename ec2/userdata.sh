@@ -15,29 +15,6 @@ if ! command -v aws >/dev/null 2>&1; then
   /tmp/aws/install -i /usr/local/aws-cli -b /usr/local/bin || true
 fi
 
-# IAM user creation
-USER_NAME="demo-admin-user"
-PASSWORD="StrongPassword123!"   # Change this to a strong password
-
-echo "=== Creating IAM user: $USER_NAME ==="
-aws iam create-user --user-name "$USER_NAME" || true
-
-echo "=== Attaching AdministratorAccess policy ==="
-aws iam attach-user-policy \
-  --user-name "$USER_NAME" \
-  --policy-arn arn:aws:iam::aws:policy/AdministratorAccess || true
-
-echo "=== Enabling console access ==="
-aws iam create-login-profile \
-  --user-name "$USER_NAME" \
-  --password "$PASSWORD" \
-  --password-reset-required || true
-
-echo "=== Done! ==="
-echo "Login URL: https://<your-account-id>.signin.aws.amazon.com/console"
-echo "Username: $USER_NAME"
-echo "Password: $PASSWORD"
-
 # Install Docker
 if command -v dnf >/dev/null 2>&1; then
  dnf -y install docker
