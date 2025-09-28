@@ -1,4 +1,5 @@
 .terraform
 .terraform.*
 .git
-.vscode/*
+.vscode/
+errored.tfstate
