@@ -7,7 +7,7 @@ variable "launch_template_name" {
 variable "instance_type" {
   description = "Instance type for the EKS nodes."
   type        = string
-  default     = "t2.medium"
+  default     = "t3.small"
 }
 
 variable "key_name" {

@@ -20,7 +20,7 @@ module "ec2" {
   iam_role_name     = "demo-eks-jump-role"
   vpc_id            = module.vpc.vpc_id
   subnet_id         = module.vpc.public_subnets[0]
-  instance_type     = "t3.medium"
+  instance_type     = "t3.small"
   ssh_cidr_blocks   = ["106.215.180.79/32"]
   public_key_path   = "./demo-eks.pub"
   tags = {
